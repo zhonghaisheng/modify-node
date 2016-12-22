@@ -240,10 +240,12 @@ app.post("", urlencodedParser, function(req, res, next) {
                     var oldNum = oldName[0].replace(/[^0-9]+/g, "");
                     var oldPage = oldName[0].replace(/[^a-z]+/ig, "");
                     // 更改统计代码中的统计
-                    var tjCode1 = '_hmt.push(\\["_trackEvent", "'+old_link+'"\\]);';
-                    var tjCode2 = '_czc.push(\\["_trackEvent","'+oldPage+'","'+oldNum+'"\\]);';
-                    var tjCode1New = '_hmt.push(\\["_trackEvent", "' + newHtmlName[0] + '"\\]);';
-                    var tjCode2New = '_czc.push(\\["_trackEvent",' + newPage + ',' + newNum + '\\]);';
+                    var tjCode1 = '_hmt.push(\\[\\"_trackEvent\\", \\"'+old_link+'\\"\\]);';
+                    var tjCode2 = '_czc.push(\\[\\"_trackEvent\\",\\"'+oldPage+'\\",\\"'+oldNum+'\\"\\]);';
+                    console.log(tjCode1,tjCode2);
+                    var tjCode1New = '_hmt.push(\\[\\"_trackEvent\\", \\"' + newHtmlName[0]+'\\"\\]);';
+                    var tjCode2New = '_czc.push(\\[\\"_trackEvent\\",\\"' + newPage+'\\",\\"'+ newNum +'\\"\\]);';
+                     console.log(tjCode1New,tjCode2New);
                     html = html.replaceAll(tjCode1, tjCode1New);
                     html = html.replaceAll(tjCode2, tjCode2New);
                     //
