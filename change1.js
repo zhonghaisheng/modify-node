@@ -18,9 +18,9 @@ app.get("", function(req, res, next) {
     // res.sendFile('./view/index.html');
     res.sendFile(__dirname + '/view/index.html');
 });
-app.get("/zskn30.html", function(req, res, next) {
+app.get("/ltby30.html", function(req, res, next) {
     // res.sendFile('./view/index.html');
-    res.sendFile(__dirname + '/view/zskn30.html');
+    res.sendFile(__dirname + '/view/ltby30.html');
 });
 app.post("", urlencodedParser, function(req, res, next) {
     //接受数据 
@@ -204,7 +204,7 @@ app.post("", urlencodedParser, function(req, res, next) {
             });
         });
     }
-    oldUrl = "http://localhost:3000/zskn30.html";
+    oldUrl = "http://localhost:3000/ltby30.html";
     console.log("oldUrl" + oldUrl);
     if (typeof oldUrl == 'string') {
         superagent.get(oldUrl)
@@ -263,11 +263,11 @@ app.post("", urlencodedParser, function(req, res, next) {
                         var footText = $(myfooter).text().trim();
                         //版权无内容的时候版权必须是footer标签
                         if (footText == "") {
-                            var footerText="\<footer\>(.*)<\/footer\>";
+                            var footerText = "<footer>(.*)<\/footer>";
                             if (Array.isArray(myfooterText)) {                                
-                               html = html.replaceAll(footText, "\<footer\>"+myfooterText[htmlIndex]+"\<\/footer\>");
+                               html = html.replaceAll(footerText, "<footer>" +myfooterText[htmlIndex] + "</footer>");
                             } else {
-                                html = html.replaceAll(footText, "\<footer\>"+myfooterText+"\<\/footer\>");
+                                html = html.replaceAll(footerText,  "<footer>" + myfooterText + "</footer>");
                             }
                         } else {
                             //版权有内容
