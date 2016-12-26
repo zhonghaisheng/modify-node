@@ -2,25 +2,39 @@ var http = require('http')
 var fs = require('fs');
 var path = require('path');
 var xlsx2json = require("node-xlsx");
-var list = xlsx2json.parse("./text.xlsx");
 var eventproxy = require('eventproxy');
 var superagent = require('superagent');
 var cheerio = require('cheerio');
 var express = require("express");
 var bodyParser = require('body-parser');
 var jsonParser = bodyParser.json();
+var mytools = require('./lib/tools.js');
 // create application/x-www-form-urlencoded parser  
 var urlencodedParser = bodyParser.urlencoded({ extended: false });
 var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
+app.use(express.static(path.join(__dirname, 'views')));
 app.get("", function(req, res, next) {
     // res.sendFile('./view/index.html');
-    res.sendFile(__dirname + '/view/index.html');
+    res.sendFile(__dirname + '/views/index.html');
 });
 app.post("", urlencodedParser, function(req, res, next) {
+    String.prototype.replaceAll = function(s1, s2) {
+        return this.replace(new RegExp(s1, "gm"), s2); //这里的gm是固定的，g可能表示global，m可能表示multiple。
+    }
+    Array.prototype.indexOf = function(el) {
+        for (var i = 0, n = this.length; i < n; i++) {
+            if (this[i] === el) {
+                return i;
+            }
+        }
+        return -1;
+    }
+    var list = xlsx2json.parse("./test.xlsx");
     //接受数据 
-    var row = req.body.myrow ? req.body.myrow : 0;
+    var row = req.body.myrow ? (parseInt(req.body.myrow) - 1) : 2;
+    var rowend = req.body.myrowend ? (parseInt(req.body.myrowend) - 1) : list[0].data.length;
     //老链接是否是一个
     var ismylink = req.body.ismylink;
     if (!ismylink) {
@@ -32,8 +46,16 @@ app.post("", urlencodedParser, function(req, res, next) {
     var isdownload = req.body.isdownload ? req.body.isdownload : "";
     //下载地址的选择器是否自定义
     var mydownload = req.body.mydownload ? req.body.mydownload : ".download";
+    var isdownloadonly = req.body.isdownloadonly;
     //下载地址是一个还是多个
-    var mydownloadUrl = req.body.mydownloadUrl ? req.body.mydownloadUrl : [];
+    var mydownloadUrl = req.body.mydownloadUrl;
+    if (!isdownloadonly) {
+        mydownloadUrl = [];
+    }
+    //是否使用本地模版
+    var ismymodel = req.body.ismymodel ? req.body.ismymodel : "";
+    //本地模版名字
+    var mymodelName = req.body.mymodelName ? req.body.mymodelName : "";
     //icon是否替换
     var isicon = req.body.isicon ? req.body.isicon : "";
     //icon的选择器是否自定义
@@ -49,25 +71,43 @@ app.post("", urlencodedParser, function(req, res, next) {
     //footer是否替换
     var isfooter = req.body.isfooter ? req.body.isfooter : "";
     //footer的选择器是否自定义
-    var myfooter = req.body.myfooter ? req.body.myfooter : ".footer";
+    var myfooter = req.body.myfooter ? req.body.myfooter : "footer";
     //footer的内容是一个还是多个
     var myfooterText = req.body.myfooterText ? req.body.myfooterText : [];
-
+    //title是否替换
+    var istitle = req.body.istitle ? req.body.istitle : "";
+    //title的选择器是否自定义
+    var mytitle = req.body.mytitle ? req.body.mytitle : "title";
+    var istitleonly = req.body.istitleonly;
+    //title的内容是一个还是多个
+    var mytitleText = req.body.mytitleText;
+    if (!istitleonly) {
+        mytitleText = [];
+    }
     // console.log(list[0].data[1][2]);第一个表的第二行的第三个单元格中的数据
     //将excel中数据存入各自的数组中
     var newHtml = []; //存新生成的文件名
-    row = 2;
-    for (var i = row; i < list[0].data.length; i++) {
-        var new_link = list[0].data[i][2];
+    for (var i = row; i <= rowend; i++) {
+        var new_link = list[0].data[i][3];
         var new_pos = parseInt(new_link.lastIndexOf('/')) + 1;
         newHtml.push(new_link.substring(new_pos));
-        if (!ismylink) {
-            oldUrl.push(list[0].data[i][1]);
+        if (ismymodel) {
+            oldUrl = "http://localhost:3000/" + mymodelName + ".html";
         } else {
-            oldUrl = list[0].data[row][1];
+            if (!ismylink) {
+                oldUrl.push(list[0].data[i][1]);
+            } else {
+                oldUrl = list[0].data[row][1];
+                // console.log(row,oldUrl);
+            }
+        }
+        if (isdownload && isdownloadonly) {
+            if (!mydownloadUrl) {
+                mydownloadUrl = list[0].data[row][2];
+            }
         }
         if (isdownload && Array.isArray(mydownloadUrl)) {
-            mydownloadUrl.push(list[0].data[i][3]);
+            mydownloadUrl.push(list[0].data[i][2]);
         }
         if (isfooter && Array.isArray(myfooterText)) {
             myfooterText.push(list[0].data[i][4]);
@@ -78,17 +118,79 @@ app.post("", urlencodedParser, function(req, res, next) {
         if (islogo && Array.isArray(mylogoUrl)) {
             mylogoUrl.push(list[0].data[i][6]);
         }
-    }
-    String.prototype.replaceAll = function(s1, s2) {
-        return this.replace(new RegExp(s1, "gm"), s2); //这里的gm是固定的，g可能表示global，m可能表示multiple。
-    }
-    Array.prototype.indexOf = function(el) {
-        for (var i = 0, n = this.length; i < n; i++) {
-            if (this[i] === el) {
-                return i;
+        if (istitle && istitleonly) {
+            if (!mytitleText) {
+                mytitleText = list[0].data[row][0];
             }
         }
-        return -1;
+        if (istitle && Array.isArray(mytitleText)) {
+            mytitleText.push(list[0].data[i][7]);
+        }
+   
+    }
+    console.log("oldUrl" + oldUrl);
+    if (typeof oldUrl == 'string') {
+        superagent.get(oldUrl)
+            .end(function(err, res) {
+                if (err) {
+                    return console.error(err);
+                }
+                var $ = cheerio.load(res.text);
+                newHtml = newHtml.map(function(newHtmlText, index) {
+                    var html = res.text;
+                    var htmlIndex = index;
+                    //替换内容
+                    if (isdownload && ($(mydownload).length != 0)) {
+                        //下载链接选择器是否自定义
+                        var downloadUrl = $(mydownload).attr("href");
+                        // console.log(typeof mydownloadUrl,mydownloadUrl,downloadUrl);
+                        html = mytools.replaceCon(html, mydownloadUrl, downloadUrl, htmlIndex);
+                    }
+                    if (isicon && ($(myicon).length != 0)) {
+                        //icon选择器是否自定义
+                        var myoldicon = $(myicon).attr("src");
+                        html = mytools.replaceCon(html, myiconUrl, myoldicon, htmlIndex);
+                    }
+                    if (islogo && ($(mylogo).length != 0)) {
+                        //logo选择器是否自定义
+                        var myoldlogo = $(mylogo).attr("src");
+                        html = mytools.logoChange(myoldlogo, html, htmlIndex, mylogoUrl);
+                    }
+                    if (istitle && ($(mytitle).length != 0)) {
+                        //title选择器是否自定义
+                        var myoldtitle = $(mytitle).text().trim();
+                        html = mytools.replaceCon(html, mytitleText, myoldtitle, htmlIndex);
+                    }
+                    //console.log($(myfooter).length);
+                    if (isfooter && ($(myfooter).length != 0)) {
+                        //替换底部版权      
+                        var footText = $(myfooter).text().trim();
+                        // console.log(footText);
+                        //版权无内容的时候
+                        if (footText == "") {
+                            var outLabel = $.html(myfooter);
+                            html = mytools.footTextNone(outLabel, footText, html, myfooterText, htmlIndex);
+                        } else {
+                            //版权有内容
+                            footText = mytools.copySpecial(footText);
+                            if (Array.isArray(myfooterText)) {
+                                if (typeof myfooterText[htmlIndex] == 'undefined') {
+                                    html = html.replaceAll(footText, ' ');
+                                } else {
+                                    html = html.replaceAll(footText, myfooterText[htmlIndex]);
+                                };
+                            } else {
+                                html = html.replaceAll(footText, myfooterText);
+                            }
+                        }
+                    }
+                    html = mytools.changeStat(html, newHtmlText);
+
+                    mytools.printFile(newHtmlText, html);
+                });
+
+
+            });
     }
     if (Array.isArray(oldUrl)) {
         // 得到一个 eventproxy 的实例
@@ -106,58 +208,51 @@ app.post("", urlencodedParser, function(req, res, next) {
                 if (isdownload && ($(mydownload).length != 0)) {
                     //下载链接选择器是否自定义
                     var downloadUrl = $(mydownload).attr("href");
-                    if (Array.isArray(mydownloadUrl)) {
-                        html = html.replaceAll(downloadUrl, mydownloadUrl[url_pos]);
-                    } else {
-                        html = html.replaceAll(downloadUrl, mydownloadUrl);
-                    }
+                    html = mytools.replaceCon(html, mydownloadUrl, downloadUrl, url_pos);                 
                 }
+             
                 if (isicon && ($(myicon).length != 0)) {
                     //icon选择器是否自定义
                     var myoldicon = $(myicon).attr("src");
-                    if (Array.isArray(myiconUrl)) {
-                        html = html.replaceAll(myoldicon, myiconUrl[url_pos]);
-                    } else {
-                        html = html.replaceAll(myoldicon, myiconUrl);
-                    }
+                    html = mytools.replaceCon(html, myiconUrl, myoldicon, url_pos);
                 }
+         
                 if (islogo && ($(mylogo).length != 0)) {
                     //logo选择器是否自定义
                     var myoldlogo = $(mylogo).attr("src");
-                    if (Array.isArray(mylogoUrl)) {
-                        html = html.replaceAll(myoldlogo, mylogoUrl[url_pos]);
-                    } else {
-                        html = html.replaceAll(myoldlogo, mylogoUrl);
-                    }
+                    html = mytools.logoChange(myoldlogo, html, url_pos, mylogoUrl);
                 }
+            
+                if (istitle && ($(mytitle).length != 0)) {
+                    //title选择器是否自定义
+                    var myoldtitle = $(mytitle).text().trim();
+                    html = mytools.replaceCon(html, mytitleText, myoldtitle, url_pos);
+                }
+                 
                 if (isfooter && ($(myfooter).length != 0)) {
                     //替换底部版权      
                     var footText = $(myfooter).text().trim();
-                    if (footText.indexOf("[")) {
-                        var newArr = footText.split("[");
-                        newArr[0] = newArr[0] + "\\[";
-                        footText = newArr.join("");
-                    }
-                    if (footText.indexOf("]")) {
-                        var newArr = footText.split("]");
-                        newArr[0] = newArr[0] + "\\]";
-                        footText = newArr.join("");
-                    }
-                    if (Array.isArray(myfooterText)) {
-                        html = html.replaceAll(footText, myfooterText[url_pos]);
+                    // console.log(footText);
+                    //版权无内容的时候
+                    if (footText == "") {
+                        var outLabel = $.html(myfooter);
+                        html = mytools.footTextNone(outLabel, footText, html, myfooterText, url_pos);
                     } else {
-                        html = html.replaceAll(footText, myfooterText);
+                        //版权有内容
+                        footText = mytools.copySpecial(footText);
+                        if (Array.isArray(myfooterText)) {
+                            if (typeof myfooterText[url_pos] == 'undefined') {
+                                html = html.replaceAll(footText, ' ');
+                            } else {
+                                html = html.replaceAll(footText, myfooterText[url_pos]);
+                            };
+                        } else {
+                            html = html.replaceAll(footText, myfooterText);
+                        }
                     }
                 }
-                // 更改统计代码中的统计
-
-                //
-                fs.writeFile("./" + newHtml[url_pos], html, function(err) {
-                    if (err) {
-                        console.log('出现错误!')
-                    }
-                    console.log('已输出至' + newHtml[url_pos] + '中');
-                });
+                html = mytools.changeStat(html, newHtml[url_pos]);
+                mytools.printFile(newHtml[url_pos], html);
             });
         });
         oldUrl.forEach(function(topicUrl, index) {
@@ -167,100 +262,7 @@ app.post("", urlencodedParser, function(req, res, next) {
             });
         });
     }
-    console.log("oldUrl" + oldUrl);
-    if (typeof oldUrl == 'string') {
-
-        superagent.get(oldUrl)
-            .end(function(err, res) {
-                if (err) {
-                    return console.error(err);
-                }
-                var $ = cheerio.load(res.text);
-                newHtml = newHtml.map(function(newHtmlText, index) {
-                    var html = res.text;
-                    var htmlIndex = index;
-                    //替换内容
-                    if (isdownload && ($(mydownload).length != 0)) {
-                        //下载链接选择器是否自定义
-                        var downloadUrl = $(mydownload).attr("href");
-                        if (Array.isArray(mydownloadUrl)) {
-                            html = html.replaceAll(downloadUrl, mydownloadUrl[htmlIndex]);
-                        } else {
-                            html = html.replaceAll(downloadUrl, mydownloadUrl);
-                        }
-                    }
-                    if (isicon && ($(myicon).length != 0)) {
-                        //icon选择器是否自定义
-                        var myoldicon = $(myicon).attr("src");
-                        if (Array.isArray(myiconUrl)) {
-                            html = html.replaceAll(myoldicon, myiconUrl[htmlIndex]);
-                        } else {
-                            html = html.replaceAll(myoldicon, myiconUrl);
-                        }
-                    }
-                    if (islogo && ($(mylogo).length != 0)) {
-                        //logo选择器是否自定义
-                        var myoldlogo = $(mylogo).attr("src");
-                        if (Array.isArray(mylogoUrl)) {
-                            html = html.replaceAll(myoldlogo, mylogoUrl[htmlIndex]);
-                        } else {
-                            html = html.replaceAll(myoldlogo, mylogoUrl);
-                        }
-                    }
-                    // console.log(isfooter);
-                    if (isfooter && ($(myfooter).length != 0)) {
-                        //替换底部版权      
-                        var footText = $(myfooter).text().trim();
-                        if (footText.indexOf("[")) {
-                            var newArr = footText.split("[");
-                            newArr[0] = newArr[0] + "\\[";
-                            footText = newArr.join("");
-                        }
-                        if (footText.indexOf("]")) {
-                            var newArr = footText.split("]");
-                            newArr[0] = newArr[0] + "\\]";
-                            footText = newArr.join("");
-                        }
-                        if (Array.isArray(myfooterText)) {
-                            console.log(footText);
-                            html = html.replaceAll(footText, myfooterText[htmlIndex]);
-                        } else {
-                            html = html.replaceAll(footText, myfooterText);
-                        }
-                    }
-
-                    var newHtmlName = newHtmlText.split(".");
-                    var newNum = newHtmlName[0].replace(/[^0-9]+/g, "");
-                    var newPage = newHtmlName[0].replace(/[^a-z]+/ig, "");
-                    //老链接的统计
-                    var old_pos = parseInt(oldUrl.lastIndexOf('/')) + 1;
-                    var old_pos2 = parseInt(oldUrl.lastIndexOf('.'));
-                    var old_link = oldUrl.substring(old_pos,old_pos2);
-                    var oldName = old_link.split(".");
-                    var oldNum = oldName[0].replace(/[^0-9]+/g, "");
-                    var oldPage = oldName[0].replace(/[^a-z]+/ig, "");
-                    // 更改统计代码中的统计
-                    var tjCode1 = '_hmt.push(\\[\\"_trackEvent\\", \\"'+old_link+'\\"\\]);';
-                    var tjCode2 = '_czc.push(\\[\\"_trackEvent\\",\\"'+oldPage+'\\",\\"'+oldNum+'\\"\\]);';
-                    console.log(tjCode1,tjCode2);
-                    var tjCode1New = '_hmt.push(\\[\\"_trackEvent\\", \\"' + newHtmlName[0]+'\\"\\]);';
-                    var tjCode2New = '_czc.push(\\[\\"_trackEvent\\",\\"' + newPage+'\\",\\"'+ newNum +'\\"\\]);';
-                     console.log(tjCode1New,tjCode2New);
-                    html = html.replaceAll(tjCode1, tjCode1New);
-                    html = html.replaceAll(tjCode2, tjCode2New);
-                    //
-                    fs.writeFile("./page/" + newHtmlText, html, function(err) {
-                        if (err) {
-                            console.log('出现错误!')
-                        }
-                        console.log('已输出至' + newHtmlText + '中');
-                    });
-
-                });
-
-            });
-    }
 });
 app.listen(3000, function() {
-    console.log("server start");
+    console.log("server start http://localhost:3000");
 })

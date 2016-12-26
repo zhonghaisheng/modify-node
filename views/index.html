@@ -11,43 +11,7 @@
     <div id="index">
         <div class="container">
             <h3>第一步：请检查excel文件是否规范</h3>
-            <table class="table">
-                <caption>excel表格规范</caption>
-                <thead>
-                    <tr>
-                        <th>游戏名称</th>
-                        <th>旧h5地址</th>
-                        <th>新h5地址</th>
-                        <th>下载地址（可无）</th>
-                        <th>底部版权内容（可无）</th>                        
-                        <th>icon地址（可无）</th>
-                        <th>logo地址（可无）</th>
-                        <th>标题（可无）</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>全民传奇</td>
-                        <td>http://download.shengli.com<br>/www/tlahk4/qmcq01.html</td>
-                        <td>https://download.shengli.com<br>/www/tlihk01/qmcq01.html</td>
-                        <td>https://itunes.apple.com<br>/cn/app/id1178322253</td>
-                        <td>深圳市凡游网络科技有限公司粤网文[2015]1821-343号</td>
-                        <td>Bangalore</td>
-                        <td>Tanmay</td>
-                        <td>全民传奇</td>
-                    </tr>
-                    <tr>
-                        <td>全民传奇</td>
-                        <td>http://download.shengli.com<br>/www/tlahk4/qmcq02.html</td>
-                        <td>https://download.shengli.com<br>/www/tlihk01/qmcq01.html</td>
-                        <td>https://itunes.apple.com<br>/cn/app/id1178322253</td>
-                        <td>北京中手游科技有限公司京网文[2015]0940-689号</td>
-                        <td>Bangalore</td>
-                        <td>Tanmay</td>
-                        <td>全民传奇</td>
-                    </tr>
-                </tbody>
-            </table>
+            <img src="http://localhost:3000/img.png" alt="">
             <h3>第二步：请将excel配置文件放置到根目录下</h3>
             <h3>第三步：请根据需求填写以下配置</h3>
             <form role="form" method="post">
@@ -55,21 +19,32 @@
                     <label for="myrow">项目第一行</label>
                     <input type="text" class="form-control" id="myrow" placeholder="请输入项目起始行" name="myrow">
                 </div>
-                 <div class="form-group">
+                <div class="form-group">
                     <label for="myrowend">项目最后一行</label>
                     <input type="text" class="form-control" id="myrowend" placeholder="请输入项目最末行" name="myrowend">
                 </div>
-                <div class="checkbox">
-                    <label>
-                        <input type="checkbox" value="1"  name="ismylink">老链接是否是一个
-                    </label>
-                </div>
-              <!--   <div class="form-group" v-show="mylink">
+                <!--   <div class="form-group" v-show="mylink">
                     <div class="input-group">
                         <span class="input-group-addon">老链接</span>
                         <input type="text" class="form-control" placeholder="老链接" name="mylink">
                     </div>
                 </div> -->
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" value="1" @click="showmymodel()" name="ismymodel">模版是否使用本地模版
+                    </label>
+                </div>
+                <div class="form-group" v-show="mymodel">
+                    <div class="input-group">
+                        <span class="input-group-addon">本地模版名字</span>
+                        <input type="text" class="form-control" placeholder="本地模版放置到views目录下，例如hk01" name="mymodelName">
+                    </div>
+                </div>
+                <div class="checkbox" v-show="mylink">
+                    <label>
+                        <input type="checkbox" value="1" name="ismylink">老链接是否是一个
+                    </label>
+                </div>
                 <div class="checkbox">
                     <label>
                         <input type="checkbox" value="1" @click="showmydownload()" name="isdownload">download
@@ -81,7 +56,15 @@
                         <input type="text" class="form-control" placeholder="选择器" name="mydownload">
                     </div>
                     <br>
-                    <div class="input-group">
+                    <div class="radio">
+                        <label>
+                            <input type="radio" value="1" @click="showmydownloadOnly(1)" name="isdownloadonly" checked>下载地址唯一
+                        </label>
+                        <label>
+                            <input type="radio" value="0" @click="showmydownloadOnly(0)" name="isdownloadonly">下载地址不唯一
+                        </label>
+                    </div>
+                    <div class="input-group" v-show="mydownloadOnly">
                         <span class="input-group-addon">唯一下载地址</span>
                         <input type="text" class="form-control" placeholder="下载地址" name="mydownloadUrl">
                     </div>
@@ -134,9 +117,9 @@
                         <input type="text" class="form-control" placeholder="footer内容" name="myfooterText">
                     </div>
                 </div>
-                 <div class="checkbox">
+                <div class="checkbox">
                     <label>
-                        <input type="checkbox" value="1" @click="showmytitle()" name="istitle">标题
+                        <input type="checkbox" value="1" @click="showmytitle()" name="istitle">游戏名称
                     </label>
                 </div>
                 <div class="form-group" v-show="mytitle">
@@ -145,12 +128,21 @@
                         <input type="text" class="form-control" placeholder="选择器" name="mytitle">
                     </div>
                     <br>
-                    <div class="input-group">
-                        <span class="input-group-addon">唯一title内容</span>
-                        <input type="text" class="form-control" placeholder="footer内容" name="mytitleText">
+                    <div class="radio">
+                        <label>
+                            <input type="radio" value="1" @click="showmytitleOnly(1)" name="istitleonly" checked>游戏名称唯一
+                        </label>
+                        <label>
+                            <input type="radio" value="1" @click="showmytitleOnly(0)" name="istitleonly">游戏名称不唯一
+                        </label>
+                    </div>
+                    <div class="input-group" v-show="mytitleonly">
+                        <span class="input-group-addon">唯一游戏名称</span>
+                        <input type="text" class="form-control" placeholder="唯一游戏名称" name="mytitleText">
                     </div>
                 </div>
                 <button type="submit" class="btn btn-default">提交</button>
+                <div style="height:100px"></div>
             </form>
         </div>
     </div>
@@ -162,23 +154,45 @@
             myicon: false,
             mylogo: false,
             myfooter: false,
-            mytitle:false
+            mytitle: false,
+            mymodel: false,
+            mylink: true,
+            mytitleonly: true,
+            mydownloadOnly: true
         },
         methods: {
             showmydownload: function() {
-                this.mydownload = !this.mydownload;
+                vm.mydownload = !vm.mydownload;
             },
             showmyicon: function() {
-                this.myicon = !this.myicon;
+                vm.myicon = !vm.myicon;
             },
             showmylogo: function() {
-                this.mylogo = !this.mylogo;
+                vm.mylogo = !vm.mylogo;
             },
             showmyfooter: function() {
-                this.myfooter = !this.myfooter;
+                vm.myfooter = !vm.myfooter;
             },
             showmytitle: function() {
-                this.mytitle = !this.mytitle;
+                vm.mytitle = !vm.mytitle;
+            },
+            showmymodel: function() {
+                vm.mymodel = !vm.mymodel;
+                vm.mylink = !vm.mylink;
+            },
+            showmytitleOnly: function(num) {
+                if (num) {
+                    vm.mytitleonly = true;
+                } else {
+                    vm.mytitleonly = false;
+                }
+            },
+            showmydownloadOnly: function(num) {
+                if (num) {
+                    vm.mydownloadOnly = true;
+                } else {
+                    vm.mydownloadOnly = false;
+                }
             }
         }
     })
