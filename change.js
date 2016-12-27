@@ -190,8 +190,11 @@ app.post("", urlencodedParser, function(req, res, next) {
                     html = mytools.changeStat(html, newHtmlText);
                     //删除某些内容
                     if (!delChoose) {
-                        var delCon = $.html(delChoose);
-                        html = html.replaceAll(delCon, "");
+                        var delChooseArr = delChoose.split(",");
+                        for (var k = 0; k < delChooseArr.length; k++) {
+                            var delCon = $.html(delChoose[k]);
+                            html = html.replaceAll(delCon, "");
+                        }
                     }
                     mytools.printFile(newHtmlText, html);
                 });
@@ -262,8 +265,11 @@ app.post("", urlencodedParser, function(req, res, next) {
                 html = mytools.changeStat(html, newHtml[url_pos]);
                 //删除某些内容
                 if (!delChoose) {
-                    var delCon = $.html(delChoose);
-                    html = html.replaceAll(delCon, "");
+                    var delChooseArr = delChoose.split(",");
+                    for (var k = 0; k < delChooseArr.length; k++) {
+                        var delCon = $.html(delChoose[k]);
+                        html = html.replaceAll(delCon, "");
+                    }
                 }
                 mytools.printFile(newHtml[url_pos], html);
             });
