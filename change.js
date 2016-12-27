@@ -11,6 +11,7 @@ var jsonParser = bodyParser.json();
 var mytools = require('./lib/tools.js');
 // create application/x-www-form-urlencoded parser  
 var urlencodedParser = bodyParser.urlencoded({ extended: false });
+var dialog = require('dialog');
 var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -128,7 +129,7 @@ app.post("", urlencodedParser, function(req, res, next) {
         }
    
     }
-    console.log("oldUrl" + oldUrl);
+    //console.log("oldUrl" + oldUrl);
     if (typeof oldUrl == 'string') {
         superagent.get(oldUrl)
             .end(function(err, res) {
@@ -188,7 +189,7 @@ app.post("", urlencodedParser, function(req, res, next) {
 
                     mytools.printFile(newHtmlText, html);
                 });
-
+               dialog.info('Hello there');
 
             });
     }
@@ -254,6 +255,7 @@ app.post("", urlencodedParser, function(req, res, next) {
                 html = mytools.changeStat(html, newHtml[url_pos]);
                 mytools.printFile(newHtml[url_pos], html);
             });
+            dialog.info("生成成功！");
         });
         oldUrl.forEach(function(topicUrl, index) {
             superagent.get(topicUrl).end(function(err, res) {
