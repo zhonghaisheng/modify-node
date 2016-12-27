@@ -85,6 +85,8 @@ app.post("", urlencodedParser, function(req, res, next) {
     if (!istitleonly) {
         mytitleText = [];
     }
+    //内容删除
+    var delChoose = req.body.delChoose;
     // console.log(list[0].data[1][2]);第一个表的第二行的第三个单元格中的数据
     //将excel中数据存入各自的数组中
     var newHtml = []; //存新生成的文件名
@@ -127,7 +129,7 @@ app.post("", urlencodedParser, function(req, res, next) {
         if (istitle && Array.isArray(mytitleText)) {
             mytitleText.push(list[0].data[i][7]);
         }
-   
+
     }
     //console.log("oldUrl" + oldUrl);
     if (typeof oldUrl == 'string') {
@@ -186,10 +188,14 @@ app.post("", urlencodedParser, function(req, res, next) {
                         }
                     }
                     html = mytools.changeStat(html, newHtmlText);
-
+                    //删除某些内容
+                    if (!delChoose) {
+                        var delCon = $.html(delChoose);
+                        html = html.replaceAll(delCon, "");
+                    }
                     mytools.printFile(newHtmlText, html);
                 });
-               dialog.info('Hello there');
+                dialog.info('生成成功！');
 
             });
     }
@@ -205,31 +211,32 @@ app.post("", urlencodedParser, function(req, res, next) {
                 var $ = cheerio.load(html);
                 //此页面在当前数组中的位置
                 var url_pos = oldUrl.indexOf(topicPair[0]);
+
                 //替换内容
                 if (isdownload && ($(mydownload).length != 0)) {
                     //下载链接选择器是否自定义
                     var downloadUrl = $(mydownload).attr("href");
-                    html = mytools.replaceCon(html, mydownloadUrl, downloadUrl, url_pos);                 
+                    html = mytools.replaceCon(html, mydownloadUrl, downloadUrl, url_pos);
                 }
-             
+
                 if (isicon && ($(myicon).length != 0)) {
                     //icon选择器是否自定义
                     var myoldicon = $(myicon).attr("src");
                     html = mytools.replaceCon(html, myiconUrl, myoldicon, url_pos);
                 }
-         
+
                 if (islogo && ($(mylogo).length != 0)) {
                     //logo选择器是否自定义
                     var myoldlogo = $(mylogo).attr("src");
                     html = mytools.logoChange(myoldlogo, html, url_pos, mylogoUrl);
                 }
-            
+
                 if (istitle && ($(mytitle).length != 0)) {
                     //title选择器是否自定义
                     var myoldtitle = $(mytitle).text().trim();
                     html = mytools.replaceCon(html, mytitleText, myoldtitle, url_pos);
                 }
-                 
+
                 if (isfooter && ($(myfooter).length != 0)) {
                     //替换底部版权      
                     var footText = $(myfooter).text().trim();
@@ -253,6 +260,11 @@ app.post("", urlencodedParser, function(req, res, next) {
                     }
                 }
                 html = mytools.changeStat(html, newHtml[url_pos]);
+                //删除某些内容
+                if (!delChoose) {
+                    var delCon = $.html(delChoose);
+                    html = html.replaceAll(delCon, "");
+                }
                 mytools.printFile(newHtml[url_pos], html);
             });
             dialog.info("生成成功！");
@@ -265,6 +277,7 @@ app.post("", urlencodedParser, function(req, res, next) {
         });
     }
 });
+
 app.listen(3000, function() {
     console.log("server start http://localhost:3000");
 })
