@@ -282,6 +282,7 @@ app.post("", urlencodedParser, function(req, res, next) {
             });
         });
     }
+    res.send('生成成功！请到page2下查看！');
 });
 
 app.listen(3000, function() {
