@@ -95,7 +95,7 @@ app.post("", urlencodedParser, function(req, res, next) {
         var new_pos = parseInt(new_link.lastIndexOf('/')) + 1;
         newHtml.push(new_link.substring(new_pos));
         if (ismymodel) {
-            oldUrl = "http://localhost:3000/" + mymodelName + ".html";
+            oldUrl = "http://localhost:3000/tmpl/" + mymodelName + ".html";
         } else {
             if (!ismylink) {
                 oldUrl.push(list[0].data[i][1]);
