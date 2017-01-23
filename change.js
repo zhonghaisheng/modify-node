@@ -178,7 +178,10 @@ app.post("", urlencodedParser, function(req, res, next) {
                             footText = mytools.copySpecial(footText);
                             if (Array.isArray(myfooterText)) {
                                 if (typeof myfooterText[htmlIndex] == 'undefined') {
-                                    html = html.replaceAll(footText, ' ');
+                                    //html = html.replaceAll(footText, ' ');
+                                   //找到版权标签添加display:none;
+                                    var myfooterkb = $.html(myfooter);
+                                    html = html.replaceAll(myfooterkb, "");
                                 } else {
                                     html = html.replaceAll(footText, myfooterText[htmlIndex]);
                                 };
@@ -253,7 +256,10 @@ app.post("", urlencodedParser, function(req, res, next) {
                         footText = mytools.copySpecial(footText);
                         if (Array.isArray(myfooterText)) {
                             if (typeof myfooterText[url_pos] == 'undefined') {
-                                html = html.replaceAll(footText, ' ');
+                               // html = html.replaceAll(footText, ' ');
+                                //找到版权标签添加display:none;
+                                var myfooterkb = $.html(myfooter);
+                                 html = html.replaceAll(myfooterkb, "");
                             } else {
                                 html = html.replaceAll(footText, myfooterText[url_pos]);
                             };
