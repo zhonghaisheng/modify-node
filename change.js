@@ -181,7 +181,7 @@ app.post("", urlencodedParser, function(req, res, next) {
                                     //html = html.replaceAll(footText, ' ');
                                    //找到版权标签添加display:none;
                                     var myfooterkb = $.html(myfooter);
-                                    html = html.replaceAll(myfooterkb, "");
+                                    html = mytools.footTextNone(myfooterkb, footText, html, myfooterText, htmlIndex);
                                 } else {
                                     html = html.replaceAll(footText, myfooterText[htmlIndex]);
                                 };
@@ -259,7 +259,7 @@ app.post("", urlencodedParser, function(req, res, next) {
                                // html = html.replaceAll(footText, ' ');
                                 //找到版权标签添加display:none;
                                 var myfooterkb = $.html(myfooter);
-                                 html = html.replaceAll(myfooterkb, "");
+                                 html = mytools.footTextNone(myfooterkb, footText, html, myfooterText, htmlIndex);
                             } else {
                                 html = html.replaceAll(footText, myfooterText[url_pos]);
                             };
