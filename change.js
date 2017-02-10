@@ -16,11 +16,11 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'views')));
-app.get("", function(req, res, next) {
+app.get("/index", function(req, res, next) {
     // res.sendFile('./view/index.html');
     res.sendFile(__dirname + '/views/index.html');
 });
-app.post("", urlencodedParser, function(req, res, next) {
+app.post("/index", urlencodedParser, function(req, res, next) {
     String.prototype.replaceAll = function(s1, s2) {
         return this.replace(new RegExp(s1, "gm"), s2); //这里的gm是固定的，g可能表示global，m可能表示multiple。
     }
@@ -129,7 +129,6 @@ app.post("", urlencodedParser, function(req, res, next) {
         if (istitle && Array.isArray(mytitleText)) {
             mytitleText.push(list[0].data[i][7]);
         }
-
     }
     //console.log("oldUrl" + oldUrl);
     if (typeof oldUrl == 'string') {
@@ -172,16 +171,17 @@ app.post("", urlencodedParser, function(req, res, next) {
                         //版权无内容的时候
                         if (footText == "") {
                             var outLabel = $.html(myfooter);
-                            html = mytools.footTextNone(outLabel, footText, html, myfooterText, htmlIndex);
+                            html = mytools.footTextNone(outLabel, html, myfooterText, htmlIndex);
                         } else {
                             //版权有内容
                             footText = mytools.copySpecial(footText);
                             if (Array.isArray(myfooterText)) {
                                 if (typeof myfooterText[htmlIndex] == 'undefined') {
                                     //html = html.replaceAll(footText, ' ');
-                                   //找到版权标签添加display:none;
+                                    //找到版权标签添加display:none;
                                     var myfooterkb = $.html(myfooter);
-                                    html = mytools.footTextNone(myfooterkb, footText, html, myfooterText, htmlIndex);
+                                    //html = html.replaceAll(myfooterkb,"哈哈哈");
+                                    html = mytools.footTextNone(myfooterkb, html, myfooterText, htmlIndex);
                                 } else {
                                     html = html.replaceAll(footText, myfooterText[htmlIndex]);
                                 };
@@ -192,17 +192,18 @@ app.post("", urlencodedParser, function(req, res, next) {
                     }
                     html = mytools.changeStat(html, newHtmlText);
                     //删除某些内容
-                    if (!delChoose) {
+                    if (delChoose) {
                         var delChooseArr = delChoose.split(",");
                         for (var k = 0; k < delChooseArr.length; k++) {
-                            var delCon = $.html(delChoose[k]);
-                            html = html.replaceAll(delCon, "");
+                            var delCon = $.html(delChooseArr[k]);
+                            //删除节点
+                            console.log(delCon);
+                            html = mytools.delNode(delCon, html);
                         }
                     }
                     mytools.printFile(newHtmlText, html);
                 });
                 dialog.info('生成成功！');
-
             });
     }
     if (Array.isArray(oldUrl)) {
@@ -217,32 +218,27 @@ app.post("", urlencodedParser, function(req, res, next) {
                 var $ = cheerio.load(html);
                 //此页面在当前数组中的位置
                 var url_pos = oldUrl.indexOf(topicPair[0]);
-
                 //替换内容
                 if (isdownload && ($(mydownload).length != 0)) {
                     //下载链接选择器是否自定义
                     var downloadUrl = $(mydownload).attr("href");
                     html = mytools.replaceCon(html, mydownloadUrl, downloadUrl, url_pos);
                 }
-
                 if (isicon && ($(myicon).length != 0)) {
                     //icon选择器是否自定义
                     var myoldicon = $(myicon).attr("src");
                     html = mytools.replaceCon(html, myiconUrl, myoldicon, url_pos);
                 }
-
                 if (islogo && ($(mylogo).length != 0)) {
                     //logo选择器是否自定义
                     var myoldlogo = $(mylogo).attr("src");
                     html = mytools.logoChange(myoldlogo, html, url_pos, mylogoUrl);
                 }
-
                 if (istitle && ($(mytitle).length != 0)) {
                     //title选择器是否自定义
                     var myoldtitle = $(mytitle).text().trim();
                     html = mytools.replaceCon(html, mytitleText, myoldtitle, url_pos);
                 }
-
                 if (isfooter && ($(myfooter).length != 0)) {
                     //替换底部版权      
                     var footText = $(myfooter).text().trim();
@@ -250,16 +246,15 @@ app.post("", urlencodedParser, function(req, res, next) {
                     //版权无内容的时候
                     if (footText == "") {
                         var outLabel = $.html(myfooter);
-                        html = mytools.footTextNone(outLabel, footText, html, myfooterText, url_pos);
+                        html = mytools.footTextNone(outLabel, html, myfooterText, url_pos);
                     } else {
                         //版权有内容
                         footText = mytools.copySpecial(footText);
                         if (Array.isArray(myfooterText)) {
                             if (typeof myfooterText[url_pos] == 'undefined') {
-                               // html = html.replaceAll(footText, ' ');
-                                //找到版权标签添加display:none;
+                                //html = html.replaceAll(footText, ' ');
                                 var myfooterkb = $.html(myfooter);
-                                 html = mytools.footTextNone(myfooterkb, footText, html, myfooterText, htmlIndex);
+                                html = mytools.footTextNone(myfooterkb, html, myfooterText, htmlIndex);
                             } else {
                                 html = html.replaceAll(footText, myfooterText[url_pos]);
                             };
@@ -270,11 +265,13 @@ app.post("", urlencodedParser, function(req, res, next) {
                 }
                 html = mytools.changeStat(html, newHtml[url_pos]);
                 //删除某些内容
-                if (!delChoose) {
+                if (delChoose) {
                     var delChooseArr = delChoose.split(",");
                     for (var k = 0; k < delChooseArr.length; k++) {
-                        var delCon = $.html(delChoose[k]);
-                        html = html.replaceAll(delCon, "");
+                        var delCon = $.html(delChooseArr[k]);
+                        //删除节点
+                        console.log(delCon);
+                        html = mytools.delNode(delCon, html);
                     }
                 }
                 mytools.printFile(newHtml[url_pos], html);
@@ -290,7 +287,6 @@ app.post("", urlencodedParser, function(req, res, next) {
     }
     res.send('生成成功！请到page2下查看！');
 });
-
 app.listen(3000, function() {
     console.log("server start http://localhost:3000");
 })
