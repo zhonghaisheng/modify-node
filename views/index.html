@@ -1,8 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
-<meta charset="UTF-8">
     <title>node批量修改</title>
     <link href="//cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
     <script src="//cdn.bootcss.com/vue/2.1.6/vue.min.js"></script>
@@ -15,7 +14,7 @@
             <img src="http://localhost:3000/img.jpg" alt="">
             <h3>第二步：请将excel配置文件放置到根目录下</h3>
             <h3>第三步：请根据需求填写以下配置</h3>
-            <form role="form" method="post">
+            <form role="form" method="post" action="index">
                 <div class="form-group">
                     <label for="myrow">项目第一行</label>
                     <input type="text" class="form-control" id="myrow" placeholder="请输入项目起始行" name="myrow">
@@ -83,7 +82,26 @@
                     <br>
                     <div class="input-group">
                         <span class="input-group-addon">唯一icon地址</span>
-                        <input type="text" class="form-control" placeholder="icon地址" name="myiconUrl">
+                          <input type="hidden" class="form-control" placeholder="logo地址" name="myiconUrl" v-model="myiconUrl">
+                        <select class="form-control" placeholder="icon地址" @change="selectValIcon">
+                            <option value="https://download.shengli.com/logo_icon/ltby_s/icon.png">雷霆霸业</option>
+                            <option value="https://download.shengli.com/logo_icon/mlzy_s/icon.png">魔龙战域</option>
+                            <option value="https://download.shengli.com/logo_icon/mshh_s/icon.png">灭世洪荒</option>
+                            <option value="https://download.shengli.com/logo_icon/ql_s/icon.png">器灵</option>
+                            <option value="https://download.shengli.com/logo_icon/qmcq_s/icon.png">全民传奇</option>
+                            <option value="https://download.shengli.com/logo_icon/sgdtx_s/icon.png">四哥打天下</option>
+                            <option value="https://download.shengli.com/logo_icon/tlkz_s/icon.png">屠龙狂战</option>
+                            <option value="https://download.shengli.com/logo_icon/tlzg_s/icon.png">屠龙战歌</option>
+                            <option value="https://download.shengli.com/logo_icon/wzcq_s/icon.png">王者传奇</option>
+                            <option value="https://download.shengli.com/logo_icon/zskn_s/icon.png">战神狂怒</option>
+                            <option value="https://download.shengli.com/logo_icon/ttcq_s/icon.png">通天传奇</option>
+                            <option value="">其他</option>
+                        </select>
+                    </div>
+                    <br>
+                    <div class="input-group" v-show="myiconUrl2">
+                        <span class="input-group-addon">其他</span>
+                        <input type="text" class="form-control" placeholder="icon地址" @input="changeIconUrl($event)">
                     </div>
                 </div>
                 <div class="checkbox">
@@ -99,7 +117,26 @@
                     <br>
                     <div class="input-group">
                         <span class="input-group-addon">唯一logo地址</span>
-                        <input type="text" class="form-control" placeholder="logo地址" name="mylogoUrl">
+                         <input type="hidden" class="form-control" placeholder="logo地址" name="mylogoUrl" v-model="mylogoUrl">
+                        <select class="form-control" placeholder="logo地址" @change="selectValLogo">
+                            <option value="https://download.shengli.com/logo_icon/ltby_s/logo.png">雷霆霸业</option>
+                            <option value="https://download.shengli.com/logo_icon/mlzy_s/logo.png">魔龙战域</option>
+                            <option value="https://download.shengli.com/logo_icon/mshh_s/logo.png">灭世洪荒</option>
+                            <option value="https://download.shengli.com/logo_icon/ql_s/logo.png">器灵</option>
+                            <option value="https://download.shengli.com/logo_icon/qmcq_s/logo.png">全民传奇</option>
+                            <option value="https://download.shengli.com/logo_icon/sgdtx_s/logo.png">四哥打天下</option>
+                            <option value="https://download.shengli.com/logo_icon/tlkz_s/logo.png">屠龙狂战</option>
+                            <option value="https://download.shengli.com/logo_icon/tlzg_s/logo.png">屠龙战歌</option>
+                            <option value="https://download.shengli.com/logo_icon/wzcq_s/logo.png">王者传奇</option>
+                            <option value="https://download.shengli.com/logo_icon/zskn_s/logo.png">战神狂怒</option>
+                            <option value="https://download.shengli.com/logo_icon/ttcq_s/logo.png">通天传奇</option>
+                            <option value="">其他</option>
+                        </select>
+                    </div>
+                    <br>
+                    <div class="input-group" v-show="mylogoUrl2">
+                        <span class="input-group-addon">其他</span>
+                        <input type="text" class="form-control" placeholder="logo地址" @input="changeLogoUrl($event)">
                     </div>
                 </div>
                 <div class="checkbox">
@@ -144,7 +181,7 @@
                 </div>
                 <div class="input-group">
                     <span class="input-group-addon">删除内容的选择器</span>
-                    <input type="text" class="form-control" placeholder="多个选择器请用，隔开" name="delChoose">
+                    <input type="text" class="form-control" placeholder="选择器" name="delChoose">
                 </div>
                 <br>
                 <button type="submit" class="btn btn-default">提交</button>
@@ -164,11 +201,39 @@
             mymodel: false,
             mylink: true,
             mytitleonly: true,
-            mydownloadOnly: true
+            mydownloadOnly: true,
+            myiconUrl2: false,
+            myiconUrl: "",
+            mylogoUrl2: false,
+            mylogoUrl: "",
+            mylogoUrl2Value:""
         },
         methods: {
             isShow: function(obj) {
                 vm[obj] = !vm[obj];
+            },
+            selectValIcon: function(ele) {
+               if(ele.target.value!==''){
+                this.myiconUrl2=false;
+                this.myiconUrl=ele.target.value;
+               }else{
+                this.myiconUrl2=true;
+               }
+            },
+            selectValLogo: function(ele) {
+               if(ele.target.value!==''){
+                this.mylogoUrl2=false;
+                this.mylogoUrl=ele.target.value;
+               }else{
+                this.mylogoUrl2=true;
+                this.mylogoUrl=this.mylogoUrl2Value;
+               }
+            },
+            changeIconUrl:function(ele){
+               this.myiconUrl=ele.target.value;
+            },
+            changeLogoUrl:function(ele){
+               this.mylogoUrl=ele.target.value;
             },
             // showmydownload: function() {
             //     vm.mydownload = !vm.mydownload;
