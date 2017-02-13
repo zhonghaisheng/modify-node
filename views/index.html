@@ -5,6 +5,8 @@
     <title>node批量修改</title>
     <link href="//cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
     <script src="//cdn.bootcss.com/vue/2.1.6/vue.min.js"></script>
+    <script src="//cdn.bootcss.com/vue/2.1.6/vue.min.js"></script>
+    <script src="http://cdn.bootcss.com/vue-resource/1.1.0/vue-resource.min.js"></script>
 </head>
 
 <body>
@@ -82,9 +84,10 @@
                     <br>
                     <div class="input-group">
                         <span class="input-group-addon">唯一icon地址</span>
-                          <input type="hidden" class="form-control" placeholder="logo地址" name="myiconUrl" v-model="myiconUrl">
+                        <input type="hidden" class="form-control" placeholder="logo地址" name="myiconUrl" v-model="myiconUrl">
                         <select class="form-control" placeholder="icon地址" @change="selectValIcon">
-                            <option value="https://download.shengli.com/logo_icon/ltby_s/icon.png">雷霆霸业</option>
+                            <option value="请选择游戏icon">请选择游戏icon</option>
+                            <!--  <option value="https://download.shengli.com/logo_icon/ltby_s/icon.png">雷霆霸业</option>
                             <option value="https://download.shengli.com/logo_icon/mlzy_s/icon.png">魔龙战域</option>
                             <option value="https://download.shengli.com/logo_icon/mshh_s/icon.png">灭世洪荒</option>
                             <option value="https://download.shengli.com/logo_icon/ql_s/icon.png">器灵</option>
@@ -94,7 +97,8 @@
                             <option value="https://download.shengli.com/logo_icon/tlzg_s/icon.png">屠龙战歌</option>
                             <option value="https://download.shengli.com/logo_icon/wzcq_s/icon.png">王者传奇</option>
                             <option value="https://download.shengli.com/logo_icon/zskn_s/icon.png">战神狂怒</option>
-                            <option value="https://download.shengli.com/logo_icon/ttcq_s/icon.png">通天传奇</option>
+                            <option value="https://download.shengli.com/logo_icon/ttcq_s/icon.png">通天传奇</option> -->
+                            <option v-for="item in selectIcon" v-bind:value="item.iconUrl" v-text="item.iconText"></option>
                             <option value="">其他</option>
                         </select>
                     </div>
@@ -117,9 +121,11 @@
                     <br>
                     <div class="input-group">
                         <span class="input-group-addon">唯一logo地址</span>
-                         <input type="hidden" class="form-control" placeholder="logo地址" name="mylogoUrl" v-model="mylogoUrl">
+                        <input type="hidden" class="form-control" placeholder="logo地址" name="mylogoUrl" v-model="mylogoUrl">
                         <select class="form-control" placeholder="logo地址" @change="selectValLogo">
-                            <option value="https://download.shengli.com/logo_icon/ltby_s/logo.png">雷霆霸业</option>
+                            <option value="请选择游戏logo">请选择游戏logo</option>
+                            <option v-for="item in selectLogo" v-bind:value="item.logoUrl" v-text="item.logoText"></option>
+                            <!--   <option value="https://download.shengli.com/logo_icon/ltby_s/logo.png">雷霆霸业</option>
                             <option value="https://download.shengli.com/logo_icon/mlzy_s/logo.png">魔龙战域</option>
                             <option value="https://download.shengli.com/logo_icon/mshh_s/logo.png">灭世洪荒</option>
                             <option value="https://download.shengli.com/logo_icon/ql_s/logo.png">器灵</option>
@@ -129,7 +135,7 @@
                             <option value="https://download.shengli.com/logo_icon/tlzg_s/logo.png">屠龙战歌</option>
                             <option value="https://download.shengli.com/logo_icon/wzcq_s/logo.png">王者传奇</option>
                             <option value="https://download.shengli.com/logo_icon/zskn_s/logo.png">战神狂怒</option>
-                            <option value="https://download.shengli.com/logo_icon/ttcq_s/logo.png">通天传奇</option>
+                            <option value="https://download.shengli.com/logo_icon/ttcq_s/logo.png">通天传奇</option> -->
                             <option value="">其他</option>
                         </select>
                     </div>
@@ -206,34 +212,50 @@
             myiconUrl: "",
             mylogoUrl2: false,
             mylogoUrl: "",
-            mylogoUrl2Value:""
+            mylogoUrl2Value: "",
+            selectIcon: [],
+            selectLogo: []
+        },
+        mounted: function() {
+            //初始化
+            var self = this;
+            this.$nextTick(function() {
+                this.$http.get('/data.json').then(function(response) {
+                    for (var i = 0; i < response.data.logo.length; i++) {
+                        self.selectLogo.push(response.data.logo[i]);
+                    }
+                    for (var j = 0; j < response.data.icon.length; j++) {
+                        self.selectIcon.push(response.data.icon[j]);
+                    }
+                }, function(response) {});
+            })
         },
         methods: {
             isShow: function(obj) {
                 vm[obj] = !vm[obj];
             },
             selectValIcon: function(ele) {
-               if(ele.target.value!==''){
-                this.myiconUrl2=false;
-                this.myiconUrl=ele.target.value;
-               }else{
-                this.myiconUrl2=true;
-               }
+                if (ele.target.value !== '') {
+                    this.myiconUrl2 = false;
+                    this.myiconUrl = ele.target.value;
+                } else {
+                    this.myiconUrl2 = true;
+                }
             },
             selectValLogo: function(ele) {
-               if(ele.target.value!==''){
-                this.mylogoUrl2=false;
-                this.mylogoUrl=ele.target.value;
-               }else{
-                this.mylogoUrl2=true;
-                this.mylogoUrl=this.mylogoUrl2Value;
-               }
+                if (ele.target.value !== '') {
+                    this.mylogoUrl2 = false;
+                    this.mylogoUrl = ele.target.value;
+                } else {
+                    this.mylogoUrl2 = true;
+                    this.mylogoUrl = this.mylogoUrl2Value;
+                }
             },
-            changeIconUrl:function(ele){
-               this.myiconUrl=ele.target.value;
+            changeIconUrl: function(ele) {
+                this.myiconUrl = ele.target.value;
             },
-            changeLogoUrl:function(ele){
-               this.mylogoUrl=ele.target.value;
+            changeLogoUrl: function(ele) {
+                this.mylogoUrl = ele.target.value;
             },
             // showmydownload: function() {
             //     vm.mydownload = !vm.mydownload;
