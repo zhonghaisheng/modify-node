@@ -1,37 +1,29 @@
 var http = require('http')
 var fs = require('fs');
 var path = require('path');
-var express = require("express");
-var bodyParser = require('body-parser');
-var jsonParser = bodyParser.json();
-// create application/x-www-form-urlencoded parser  
-var urlencodedParser = bodyParser.urlencoded({ extended: false });
-var app = express();
-
 var xlsx2json = require("node-xlsx");
 var eventproxy = require('eventproxy');
 var superagent = require('superagent');
 var cheerio = require('cheerio');
+var express = require("express");
+var bodyParser = require('body-parser');
+var jsonParser = bodyParser.json();
 var mytools = require('./lib/tools.js');
+// create application/x-www-form-urlencoded parser  
+var urlencodedParser = bodyParser.urlencoded({ extended: false });
 var dialog = require('dialog');
-
+var app = express();
 app.set('views', path.join(__dirname, 'views'));
-//__dirname是node.js里面的全局变量，即取得执行的js所在的路径
-
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'views')));
-
 app.get("/index", function(req, res, next) {
     // res.sendFile('./view/index.html');
     res.sendFile(__dirname + '/views/index.html');
 });
-
 app.post("/index", urlencodedParser, function(req, res, next) {
-
     String.prototype.replaceAll = function(s1, s2) {
         return this.replace(new RegExp(s1, "gm"), s2); //这里的gm是固定的，g可能表示global，m可能表示multiple。
     }
-
     Array.prototype.indexOf = function(el) {
         for (var i = 0, n = this.length; i < n; i++) {
             if (this[i] === el) {
@@ -40,7 +32,6 @@ app.post("/index", urlencodedParser, function(req, res, next) {
         }
         return -1;
     }
-
     var list = xlsx2json.parse("./test.xlsx");
     //接受数据 
     var row = req.body.myrow ? (parseInt(req.body.myrow) - 1) : 2;
@@ -59,7 +50,7 @@ app.post("/index", urlencodedParser, function(req, res, next) {
     var isdownloadonly = req.body.isdownloadonly;
     //下载地址是一个还是多个
     var mydownloadUrl = req.body.mydownloadUrl;
-    if (!isdownloadonly) {
+    if (isdownloadonly==0) {
         mydownloadUrl = [];
     }
     //是否使用本地模版
@@ -91,20 +82,18 @@ app.post("/index", urlencodedParser, function(req, res, next) {
     var istitleonly = req.body.istitleonly;
     //title的内容是一个还是多个
     var mytitleText = req.body.mytitleText;
-    if (!istitleonly) {
+    if (istitleonly==0) {
         mytitleText = [];
     }
     //内容删除
     var delChoose = req.body.delChoose;
     // console.log(list[0].data[1][2]);第一个表的第二行的第三个单元格中的数据
-    
     //将excel中数据存入各自的数组中
     var newHtml = []; //存新生成的文件名
     for (var i = row; i <= rowend; i++) {
         var new_link = list[0].data[i][3];
         var new_pos = parseInt(new_link.lastIndexOf('/')) + 1;
         newHtml.push(new_link.substring(new_pos));
-        //是否使用模版
         if (ismymodel) {
             oldUrl = "http://localhost:3000/tmpl/" + mymodelName + ".html";
         } else {
@@ -141,6 +130,7 @@ app.post("/index", urlencodedParser, function(req, res, next) {
             mytitleText.push(list[0].data[i][7]);
         }
     }
+
     //console.log("oldUrl" + oldUrl);
     if (typeof oldUrl == 'string') {
         superagent.get(oldUrl)
@@ -157,6 +147,7 @@ app.post("/index", urlencodedParser, function(req, res, next) {
                         //下载链接选择器是否自定义
                         var downloadUrl = $(mydownload).attr("href");
                         // console.log(typeof mydownloadUrl,mydownloadUrl,downloadUrl);
+                       
                         html = mytools.replaceCon(html, mydownloadUrl, downloadUrl, htmlIndex);
                     }
                     if (isicon && ($(myicon).length != 0)) {
