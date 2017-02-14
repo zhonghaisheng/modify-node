@@ -5,7 +5,6 @@
     <title>node批量修改</title>
     <link href="//cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
     <script src="//cdn.bootcss.com/vue/2.1.6/vue.min.js"></script>
-    <script src="//cdn.bootcss.com/vue/2.1.6/vue.min.js"></script>
     <script src="http://cdn.bootcss.com/vue-resource/1.1.0/vue-resource.min.js"></script>
 </head>
 
@@ -218,17 +217,18 @@
         },
         mounted: function() {
             //初始化
-            var self = this;
-            this.$nextTick(function() {
-                this.$http.get('/data.json').then(function(response) {
-                    for (var i = 0; i < response.data.logo.length; i++) {
-                        self.selectLogo.push(response.data.logo[i]);
-                    }
-                    for (var j = 0; j < response.data.icon.length; j++) {
-                        self.selectIcon.push(response.data.icon[j]);
-                    }
-                }, function(response) {});
-            })
+            //使用本地json   
+                // var self = this;
+                // this.$nextTick(function() {        
+                //     this.$http.get('/data.json').then(function(response) {
+                //         for (var i = 0; i < response.data.logo.length; i++) {
+                //             self.selectLogo.push(response.data.logo[i]);
+                //         }
+                //         for (var j = 0; j < response.data.icon.length; j++) {
+                //             self.selectIcon.push(response.data.icon[j]);
+                //         }
+                //     });
+                // })
         },
         methods: {
             isShow: function(obj) {
@@ -291,8 +291,20 @@
                 }
             }
         }
-    })
+    });
     </script>
+    <script type="text/javascript">
+    function localHandler(data) {
+        for (var i = 0; i < data.logo.length; i++) {
+            vm.selectLogo.push(data.logo[i]);
+        }
+        for (var j = 0; j < data.icon.length; j++) {
+            vm.selectIcon.push(data.icon[j]);
+        }
+    };
+    </script> 
+     <!--使用线上json-->
+     <script type="text/javascript" src="https://download.shengli.com/logo_icon/data.js"></script>
 </body>
 
 </html>
