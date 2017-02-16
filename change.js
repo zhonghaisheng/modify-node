@@ -176,32 +176,31 @@ app.post("/index", urlencodedParser, function(req, res, next) {
                     }
                     //console.log($(myfooter).length);
                     if (isfooter && ($(myfooter).length != 0)) {
-                        for (i = 0; i < $(myfooter).length; i++) {
-                            //替换底部版权      
-                            var footText = $(myfooter).eq(i).text().trim();
-                            // console.log(footText);
-                            //版权无内容的时候
-                            if (footText == "") {
-                                var outLabel = $.html(myfooter);
-                                html = mytools.footTextNone(outLabel, html, myfooterText, htmlIndex);
-                            } else {
-                                //版权有内容
-                                footText = mytools.copySpecial(footText);
-                                if (Array.isArray(myfooterText)) {
-                                    if (typeof myfooterText[htmlIndex] == 'undefined') {
-                                        //html = html.replaceAll(footText, ' ');
-                                        //找到版权标签添加display:none;
-                                        var myfooterkb = $.html(myfooter);
-                                        //html = html.replaceAll(myfooterkb,"哈哈哈");
-                                        html = mytools.footTextNone(myfooterkb, html, myfooterText, htmlIndex);
-                                    } else {
-                                        html = html.replaceAll(footText, myfooterText[htmlIndex]);
-                                    };
+                        //替换底部版权      
+                        var footText = $(myfooter).text().trim();
+                        // console.log(footText);
+                        //版权无内容的时候
+                        if (footText == "") {
+                            var outLabel = $.html(myfooter);
+                            html = mytools.footTextNone(footText, outLabel, html, myfooterText, htmlIndex);
+                        } else {
+                            //版权有内容
+                            footText = mytools.copySpecial(footText);
+                            if (Array.isArray(myfooterText)) {
+                                if (typeof myfooterText[htmlIndex] == 'undefined') {
+                                    //html = html.replaceAll(footText, ' ');
+                                    //找到版权标签添加display:none;
+                                    var myfooterkb = $.html(myfooter);
+                                    //html = html.replaceAll(myfooterkb,"哈哈哈");
+                                    html = mytools.footTextNone(footText, myfooterkb, html, myfooterText, htmlIndex);
                                 } else {
-                                    html = html.replaceAll(footText, myfooterText);
-                                }
+                                    html = html.replaceAll(footText, myfooterText[htmlIndex]);
+                                };
+                            } else {
+                                html = html.replaceAll(footText, myfooterText);
                             }
                         }
+
                     }
                     html = mytools.changeStat(html, newHtmlText);
                     //删除某些内容
@@ -262,31 +261,31 @@ app.post("/index", urlencodedParser, function(req, res, next) {
                     }
                 }
                 if (isfooter && ($(myfooter).length != 0)) {
-                    for (i = 0; i < $(myfooter).length; i++) {
-                        //替换底部版权      
-                        var footText = $(myfooter).eq(i).text().trim();
 
-                        // console.log(footText);
-                        //版权无内容的时候
-                        if (footText == "") {
-                            var outLabel = $.html(myfooter);
-                            html = mytools.footTextNone(outLabel, html, myfooterText, url_pos);
-                        } else {
-                            //版权有内容
-                            footText = mytools.copySpecial(footText);
-                            if (Array.isArray(myfooterText)) {
-                                if (typeof myfooterText[url_pos] == 'undefined') {
-                                    //html = html.replaceAll(footText, ' ');
-                                    var myfooterkb = $.html(myfooter);
-                                    html = mytools.footTextNone(myfooterkb, html, myfooterText, htmlIndex);
-                                } else {
-                                    html = html.replaceAll(footText, myfooterText[url_pos]);
-                                };
+                    //替换底部版权      
+                    var footText = $(myfooter).text().trim();
+
+                    // console.log(footText);
+                    //版权无内容的时候
+                    if (footText == "") {
+                        var outLabel = $.html(myfooter);
+                        html = mytools.footTextNone(footText,outLabel, html, myfooterText, url_pos);
+                    } else {
+                        //版权有内容
+                        footText = mytools.copySpecial(footText);
+                        if (Array.isArray(myfooterText)) {
+                            if (typeof myfooterText[url_pos] == 'undefined') {
+                                //html = html.replaceAll(footText, ' ');
+                                var myfooterkb = $.html(myfooter);
+                                html = mytools.footTextNone(footText,myfooterkb, html, myfooterText, htmlIndex);
                             } else {
-                                html = html.replaceAll(footText, myfooterText);
-                            }
+                                html = html.replaceAll(footText, myfooterText[url_pos]);
+                            };
+                        } else {
+                            html = html.replaceAll(footText, myfooterText);
                         }
                     }
+
                 }
                 html = mytools.changeStat(html, newHtml[url_pos]);
                 //删除某些内容
