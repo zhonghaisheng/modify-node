@@ -1,6 +1,7 @@
 var http = require('http')
 var fs = require('fs');
 var path = require('path');
+var cprocess = require('child_process');
 var xlsx2json = require("node-xlsx");
 var eventproxy = require('eventproxy');
 var superagent = require('superagent');
@@ -312,5 +313,6 @@ app.post("/index", urlencodedParser, function(req, res, next) {
     res.send('生成成功！请到page2下查看！');
 });
 app.listen(3000, function() {
+    cprocess.exec("start http://localhost:3000")
     console.log("server start http://localhost:3000");
 })
