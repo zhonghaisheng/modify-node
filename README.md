@@ -5,5 +5,5 @@
 支持内容删除<br>
 test.xlsx中的第一个表是一对一的实例，第二个表是一对多的实例
 避免页面中出现++、--可以用+=1、-=1代替，出现++或者--正则无法运行
-footer中空白的时候请这样写<footer></footer>或者<footer>   </footer>，不要<footer>折行</footer>
-
+footer中空白的时候请不要折行<br>
+icon中的数据目前是跨域调用
