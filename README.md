@@ -7,3 +7,15 @@ test.xlsx中的第一个表是一对一的实例，第二个表是一对多的�
 避免页面中出现++、--可以用+=1、-=1代替，出现++或者--正则无法运行
 footer中空白的时候请不要折行<br>
 icon中的数据目前是跨域调用
+
+cmd命令行运行：
+
+cd [本地盘目录]
+
+cd modify-node
+
+npm install/cnpm install
+
+cd trunk
+
+node change
